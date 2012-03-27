@@ -119,7 +119,7 @@ var removeAll = function(found) {
   found.forEach(function(comment) {
     comments.remove(comment).fail(fail);
   });
-});
+};
 comments.all({limit: 0, skip: 0}).then(removeAll, fail);
 
 // or save the promise for registering callbacks later
