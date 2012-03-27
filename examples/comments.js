@@ -153,14 +153,14 @@ $(function() {
   }
 
   /*
-   * Create a pubsub channel, subscribe to its stream of messages, and publish a
-   * message to it. When we receive our own message, unsubscribe from the channel.
+   * Create a "comments" pubsub channel, subscribe to its stream of messages,
+   * and publish a comment to it. Send messages to the comments channel from the
+   * Vines Cloud web console to see them appear in this demo app.
    */
   function channels(app) {
     var comments = app.channel('comments');
     comments.subscribe(function(message) {
       console.log('comment: received on channel', message);
-      comments.unsubscribe();
     });
     comments.publish({comment: 'This is a comment!', spam: false});
   }
