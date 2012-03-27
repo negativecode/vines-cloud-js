@@ -26,7 +26,8 @@ class @Vines
       result.reject error
 
     xmpp = (user) =>
-      @xmpp.connect username, password, (status) =>
+      # username may have been email, so use user.id for xmpp
+      @xmpp.connect user.id, password, (status) =>
         switch status
           when Strophe.Status.CONNFAIL
             fail id: 'xmpp-conn-failed'
