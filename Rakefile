@@ -20,7 +20,7 @@ end
 
 desc 'Compile and minimize web assets'
 task :assets do
-  assets = %w[request resource channel pubsub app apps users storage vines]
+  assets = %w[request resource query channel pubsub app apps users storage vines]
   coffee = assets.inject('') do |sum, name|
     sum + File.read("src/#{name}.js.coffee")
   end

@@ -3,56 +3,48 @@ class Resource
 
   build: (obj) -> obj
 
-  count: (callback) ->
-    callback ||= ->
-    result = new $.Deferred
+  callback: ->
+    (arg for arg in arguments when type(arg) == 'function')[0]
 
-    done = (obj) ->
-      callback obj.total
-      result.resolve obj.total
+  where: ->
+    new Query(this).where arguments...
 
-    fail = (error) ->
-      callback null, error
-      result.reject error
+  count: ->
+    callback = this.callback arguments...
+    this.where(arguments...).count callback
 
-    get(this.url(), limit: 1).then done, fail
-    result.promise()
+  all: ->
+    callback = this.callback arguments...
+    this.where(arguments...).all callback
 
-  find: (options, callback) ->
-    callback ||= ->
-    result = new $.Deferred
+  first: ->
+    callback = this.callback arguments...
+    this.where(arguments...).first callback
 
-    done = (obj) =>
-      obj = this.build obj
-      callback obj
-      result.resolve obj
+  find: ->
+    callback = this.callback arguments...
+    ids = if type(arguments[0]) == 'array'
+      arguments[0]
+    else if type(arguments[0]) == 'string'
+      arguments
+    else
+      throw 'id required'
 
-    fail = (error) ->
-      callback null, error
-      result.reject error
+    ids = (id for id in ids when type(id) == 'string')
+    throw 'id required' unless ids.length > 0
 
-    get(this.url "/#{options.id}").then done, fail
-    result.promise()
+    # hex object ids
+    list = if ids[0].match /^[0-9a-z]{24}$/i
+      ids.join(',')
+    # usernames
+    else
+      "'" + ids.join("','") + "'"
 
-  all: (options, callback) ->
-    params = {}
-    params.limit = options.limit if options.limit
-    params.skip = options.skip if options.skip
-
-    callback ||= ->
-    result = new $.Deferred
-
-    done = (obj) =>
-      rows = (this.build row for row in obj.rows)
-      callback rows
-      result.resolve rows
-
-    fail = (error) ->
-      callback null, error
-      result.reject error
-
-    get(this.url(), params).then done, fail
-    result.promise()
+    query = "id in [#{list}]"
+    if ids.length == 1
+      this.first query, callback
+    else
+      this.all query, callback
 
   save: (options, callback) ->
     callback ||= ->
@@ -76,17 +68,17 @@ class Resource
       post(this.url(), json).then done, fail
     result.promise()
 
-  remove: (options, callback) ->
+  remove: (id, callback) ->
     callback ||= ->
     result = new $.Deferred
 
     done = (obj) ->
-      callback options
-      result.resolve options
+      callback id
+      result.resolve id
 
     fail = (error) ->
       callback null, error
       result.reject error
 
-    remove(this.url "/#{options.id}").then done, fail
+    remove(this.url "/#{id}").then done, fail
     result.promise()

@@ -4,7 +4,7 @@
  * pubsub message channel use cases are covered.
  *
  * The API is used in a variety of styles so you can get a feel for the different
- * ways it can be used. We frequently use the jQuery Promise API to simplify
+ * ways it can be used. The jQuery Promise API is frequently used to simplify
  * nested asynchronous callbacks.
  */
 $(function() {
@@ -40,7 +40,7 @@ $(function() {
    * object on which done and fail callbacks can be registered.
    */
   function findApp(nickname) {
-    return vines.apps.find({id: nickname})
+    return vines.apps.find(nickname)
       .fail(log('app: find failed ' + nickname));
   }
 
@@ -49,9 +49,9 @@ $(function() {
    * cloud account and run the demo with the first app available.
    */
   function findApps() {
-    var apps = vines.apps.all({limit: 0});
+    var apps = vines.apps.all();
     apps.fail(log('app: find failed'));
-    apps.done(log('app: found first 10'))
+    apps.done(log('app: found first 10'));
     apps.done(function(found) {
       // use the run function reference directly as a callback
       findApp(found[0].nick).done(run);
@@ -86,12 +86,30 @@ $(function() {
     });
 
     // find the first 10 Comment objects
-    comments.all({limit: 10, skip: 0}, function(found, error) {
+    comments.where().limit(10).skip(0).all(function(found, error) {
       if (error) {
         console.log('comment: find failed', error);
       } else {
         console.log('comment: found first 10', found);
       }
+    });
+
+    // complex query with where clause
+    var query = comments.where('text exists and text like :match', {match: 'comment!'});
+
+    // count the number of matching comments
+    query.count(function(count, error) {
+      console.log('comment: count with where clause', count, error);
+    });
+
+    // return all matching comments
+    query.all().done(function(comments) {
+      console.log('comment: found with where clause', comments);
+    });
+
+    // return just the first matching comment
+    query.first(function(comment, error) {
+      console.log('comment: first with where clause', comment, error);
     });
 
     // create a function to update the comment after it's saved
@@ -109,7 +127,7 @@ $(function() {
    * the cloud, and then clean up after ourselves and delete it.
    */
   function updateComment(comments, id) {
-    var find = comments.find({id: id});
+    var find = comments.find(id);
     find.fail(log('comment: find failed ' + id));
     find.done(log('comment: found by id ' + id));
     find.done(function(comment) {
@@ -119,7 +137,7 @@ $(function() {
         console.log('comment: update succeeded', updated, error);
       }).done(function() {
         // callbacks can be chained
-        comments.remove({id: id})
+        comments.remove(id)
           .done(log('comment: delete succeeded'))
           .fail(log('comment: delete failed'));
       });
@@ -132,7 +150,8 @@ $(function() {
    */
   function users() {
     vines.users.count().always(log('user: count'));
-    vines.users.all({limit: 10, skip: 0}).done(log('user: found first 10'));
+    vines.users.where().limit(10).skip(0).all().done(log('user: found first 10'));
+
     // register a new user then delete their account
     var user = {id: 'demo-user@' + vines.domain, password: 'password'};
     var signup = vines.users.save(user);
@@ -142,11 +161,11 @@ $(function() {
   }
 
   function deleteUser(user) {
-    var find = vines.users.find({id: user.id});
+    var find = vines.users.find(user.id);
     find.fail(log('user: find failed ' + user.id));
     find.done(log('user: found by id ' + user.id));
     find.done(function(user) {
-      vines.users.remove({id: user.id})
+      vines.users.remove(user.id)
         .done(log('user: delete succeeded'))
         .fail(log('user: delete failed'));
     });

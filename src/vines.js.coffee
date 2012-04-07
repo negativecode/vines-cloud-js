@@ -3,6 +3,8 @@ get    = (url, params) -> new Request('GET', url).run params
 post   = (url, params) -> new Request('POST', url).run params
 put    = (url, params) -> new Request('PUT', url).run params
 remove = (url, params) -> new Request('DELETE', url).run params
+type   = (obj) ->
+  Object::toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
 
 class @Vines
   constructor: (@domain) ->
