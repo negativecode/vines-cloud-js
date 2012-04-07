@@ -32,23 +32,30 @@ var deleted = function(obj, error)   { console.log('deleted', obj, error); };
 
 // user management
 vines.users.count(count);
-vines.users.all({limit: 0, skip: 0}, all);
-vines.users.find({id: 'alice@wonderland.getvines.com'}, one);
+vines.users.all(all);
+vines.users.find('alice@wonderland.getvines.com', one);
 vines.users.save({id: 'alice@wonderland.getvines.com', color: 'blue'}, saved);
-vines.users.remove({id: 'alice@wonderland.getvines.com'}, deleted);
+vines.users.remove('alice@wonderland.getvines.com', deleted);
 
 // apps hosted in your account
 vines.apps.count(count);
-vines.apps.all({limit: 0, skip: 0}, all);
-vines.apps.find({id: 'tea-app'}, one);
+vines.apps.all(all);
+vines.apps.find('tea-app', one);
 
 // json data storage by object class
 var comments = app.storage('Comment');
 comments.count(count);
-comments.all({limit: 0, skip: 0}, all);
-comments.find({id: nickname}, one);
+comments.all(all);
+comments.find(nickname, one);
 comments.save({text: 'This is a comment!', postId: '4f2322df2a555e67c5000017'}, saved);
-comments.remove({id: '4f2322df2a555e67c5000018'}, deleted);
+comments.remove('4f2322df2a555e67c5000018', deleted);
+
+// complex queries
+var vql = 'text is "This is a comment!" and postId is 4f2322df2a555e67c5000017';
+var query = comments.where(vql).limit(10).skip(0);
+query.count(count);
+query.all(all);
+query.first(one);
 
 // real-time message channels
 var comments = app.channel('comments');
@@ -73,12 +80,12 @@ Each method accepts a callback function as its last argument. The results of the
 var comments = app.storage('Comment');
 
 // simple logging callback
-comments.all({limit: 0, skip: 0}, function(found, error) {
+comments.all(function(found, error) {
   console.log('all comments', found, error);
 });
 
 // add some error handling
-comments.all({limit: 0, skip: 0}, function(found, error) {
+comments.all(function(found, error) {
   if (error) {
     console.log('loading comments failed', error);
   } else {
@@ -89,7 +96,7 @@ comments.all({limit: 0, skip: 0}, function(found, error) {
 });
 
 // add a nested callback to delete comments
-comments.all({limit: 0, skip: 0}, function(found, error) {
+comments.all(function(found, error) {
   if (error) {
     console.log(error);
   } else {
@@ -117,13 +124,13 @@ var comments = app.storage('Comment');
 var fail = function(error) { console.log(error); };
 var removeAll = function(found) {
   found.forEach(function(comment) {
-    comments.remove(comment).fail(fail);
+    comments.remove(comment.id).fail(fail);
   });
 };
-comments.all({limit: 0, skip: 0}).then(removeAll, fail);
+comments.all().then(removeAll, fail);
 
 // or save the promise for registering callbacks later
-var result = comments.all({limit: 0, skip: 0});
+var result = comments.all();
 result.then(removeAll, fail);
 
 // or register success and failure functions separately
@@ -139,7 +146,7 @@ And be sure to read about the [when](http://api.jquery.com/jQuery.when/) and [pi
 
 ## Dependencies
 
-This library requires jQuery 1.7.1 or better.
+This library requires jQuery 1.7.2 or better.
 
 ## Contact
 
