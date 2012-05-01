@@ -28,9 +28,8 @@ class Query
     callback ||= ->
     result = new $.Deferred
 
-    done = (rows) =>
+    done = (rows) ->
       obj = rows[0]
-      obj = @resource.build(obj) if obj
       callback obj
       result.resolve obj
 
