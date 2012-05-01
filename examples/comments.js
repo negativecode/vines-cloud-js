@@ -182,6 +182,13 @@ $(function() {
       console.log('comment: received on channel', message);
     });
     comments.publish({comment: 'This is a comment!', spam: false});
+
+    var channels = app.channels();
+    channels.done(function(found) {
+      console.log('channels: found all', found);
+      if (found.length == 0) return;
+      found[0].publish({comment: 'Another comment!'});
+    });
   }
 
   /*

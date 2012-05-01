@@ -6,19 +6,27 @@ class App
     @pubsub = obj.pubsub
 
   classes: (callback) ->
+    this.load '/classes', callback, (row) =>
+      new Storage row.name, this
+
+  channels: (callback) ->
+    this.load '/channels', callback, (row) =>
+      new Channel row.name, this
+
+  load: (url, callback, builder) ->
     callback ||= ->
     result = new $.Deferred
 
     done = (obj) ->
-      storage = (new Storage row.name, this for row in obj.rows)
-      callback storage
-      result.resolve storage
+      results = (builder row for row in obj.rows)
+      callback results
+      result.resolve results
 
     fail = (error) ->
       callback null, error
       result.reject error
 
-    get(this.url '/classes').then done, fail
+    get(this.url url).then done, fail
     result.promise()
 
   url: (resource) ->
