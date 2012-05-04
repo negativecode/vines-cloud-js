@@ -23,7 +23,7 @@ class PubSub
     $('delete', node).attr 'node', @name
     this.sendIQ node, (result) ->
 
-  publish: (msg) ->
+  publish: (obj) ->
     node = this.xml """
       <iq type='set' to='#{@domain}'>
         <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -36,7 +36,7 @@ class PubSub
       </iq>
     """
     $('publish', node).attr 'node', @name
-    $('payload', node).text JSON.stringify(msg)
+    $('payload', node).text JSON.stringify(obj)
     this.sendIQ node, (result) ->
 
   subscribe: ->
