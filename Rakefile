@@ -11,7 +11,7 @@ CLOBBER.include('pkg', 'vines.js', 'vines.min.js')
 desc 'Build distributable packages'
 task :build => :assets do
   # create package task after assets are generated so they're included in FileList
-  Rake::PackageTask.new('vines-cloud-js', '0.3.0') do |pkg|
+  Rake::PackageTask.new('vines-cloud-js', '0.4.0') do |pkg|
     pkg.package_files = FileList['LICENSE', 'README.md', 'vines.js', 'vines.min.js', 'examples/*']
     pkg.need_zip = true
   end
@@ -20,7 +20,7 @@ end
 
 desc 'Compile and minimize web assets'
 task :assets do
-  assets = %w[request resource query channel pubsub app apps users storage vines]
+  assets = %w[request resource query channel pubsub app apps users stats storage vines]
   coffee = assets.inject('') do |sum, name|
     sum + File.read("src/#{name}.js.coffee")
   end
