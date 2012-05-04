@@ -7,11 +7,15 @@ class App
 
   classes: (callback) ->
     this.load '/classes', callback, (row) =>
-      new Storage row.name, this
+      storage = new Storage row.name, this
+      storage.size = row.size
+      storage
 
   channels: (callback) ->
     this.load '/channels', callback, (row) =>
-      new Channel row.name, this
+      channel = new Channel row.name, this
+      channel.subscribers = row.subscribers
+      channel
 
   load: (url, callback, builder) ->
     callback ||= ->
