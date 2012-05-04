@@ -1,11 +1,12 @@
 class Channel
   constructor: (@name, @app) ->
     @pubsub = new PubSub @app.vines.xmpp, @app.pubsub, @name
-    @subscribers = []
+    @subscribers = 0
+    @listeners = []
     @subscription = null
 
   subscribe: (fn) ->
-    @subscribers.push fn
+    @listeners.push fn
     @subscription ||= @app.vines.xmpp.addHandler(
       ((node) => this.notify node), null, 'message', null, null, @app.pubsub)
     @pubsub.create()
@@ -15,10 +16,14 @@ class Channel
     @pubsub.publish obj
 
   unsubscribe: ->
-    @subscribers = []
+    @listeners = []
     @app.vines.xmpp.deleteHandler @subscription
     @subscription = null
     @pubsub.unsubscribe()
+
+  remove: ->
+    this.unsubscribe()
+    @pubsub.remove()
 
   notify: (node) ->
     node    = $ node
@@ -32,5 +37,5 @@ class Channel
         publisher: from
         payload: JSON.parse payload.text()
         node: node
-      sub obj for sub in @subscribers
+      sub obj for sub in @listeners
     true # keep handler alive
