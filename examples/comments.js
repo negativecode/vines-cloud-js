@@ -40,7 +40,7 @@ $(function() {
    * object on which done and fail callbacks can be registered.
    */
   function findApp(nickname) {
-    return vines.apps.find(nickname)
+    return vines.apps.where({nick: nickname}).first()
       .fail(log('app: find failed ' + nickname));
   }
 
